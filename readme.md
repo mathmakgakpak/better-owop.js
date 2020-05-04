@@ -1,5 +1,4 @@
 # better OWOP.js
-Better OJS is just fixed ojs.
 
 ## TO-DO
 destroy\
@@ -22,30 +21,40 @@ Render captcha returns captcha token
 
 
 
-Node.js library for [OWOP](https://ourworldofpixels.com "OWOP"). Support Discord server - [discord.gg/k4u7ddk](https://discord.gg/k4u7ddk "discord.gg/k4u7ddk").
 
-Installing: `npm i owop-js`.\
+Installing: `npm i better-owop-js`.\
 **REQUIRES NODE.JS 12.0+!**
 
-![Nodejs](https://img.shields.io/badge/-Node.js%2012.0%2B-brightgreen?style=for-the-badge&logo=node.js&labelColor=1a1a1a)
-
-This is quite new package, so if you'll find any bugs, don't forget that you can contribute too! I'm often busy, so usually I'm not able to update anything quickly.
-
-*You can also use browser version in [OPM](https://opm.glitch.me "OPM"). In OPM version there is `simpleChunks` option for using OWOP internal chunks and there is no `agent`, `origin`, `controller`, and other node.js only options.*
+You can use it in opm.
 
 #### OPM Example
+You can connect to my owop from opm using server selector
 ```js
 const BOJS = OPM.require("better-owop-js");
 const Client = new BOJS.Client({
-    reconnect: true
+	ws: OWOP.options.serverAddress[0].url
 });
 
 Client.on("join", () => {
-    Client.chat.send("Hello from browser BOJS!");
+    console.log(Client.player.id);
 });
 ```
 
-# Node.js Example
+#### Browser Example (just paste)
+```js
+const BOJS = OPM.require("better-owop-js");
+const Client = new BOJS.Client({
+	protocol: 0 // if you want connecto to bop it's owop,
+	ws: "ws://104.237.150.24:1337",
+	world: "owop" // default world is owop on his owop
+});
+
+Client.on("join", () => {
+    console.log(Client.player.id);
+});
+```
+
+#### Node.js Example
 ```js
 const BOJS = require("better-owop-js");
 const Client = new BOJS.Client({
@@ -59,15 +68,15 @@ Client.on("join", () => {
 ```
 
 # Events
-`open` - Opened WebSocket connection.\
-`close` - Closed WebSocket connection.\
+`open` - WebSocket connecting got opened.\
+`close` - WebSocket connecting got closed [close reason].\
 `join` - Joined to world [world name].\
 `id` - Got id [id].\
-`rawMessage` - Any message from WebSocket server. (It can be object or string) [data].\
-`playerUpdate` - Player in world updates [player object].\
-`pixelUpdate` - New pixel in world [pixel object which has id of player which set pixel only then if protocol is new].\
-`disconnect` - Someone in world disconnected [player object].\
-`playerConnect` - Someone in world connected [player object].\
+`rawMessage` - Raw websocked message (ArrayBuffer or string) [data].\
+`playerUpdate` - Player updates [player object].\
+`pixelUpdate` - Pixel update [pixel object].\
+`playerLeft` - a player left [player object].\
+`playerJoin` - a player connected [player id].\
 `teleport` - got 'teleport' opcode. Very rare. [x, y].\
 `rank` - Got new rank. [rank].\
 `captcha` - Captcha state. [gcaptcha id].\
