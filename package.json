@@ -1,0 +1,23 @@
+{
+  "name": "better-owop-js",
+  "version": "1.0.0",
+  "description": "better owop-js",
+  "main": "index.js",
+  "dependencies": {
+    "ws": "^7.2.5"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mathmakgakpak/better-owop.js.git"
+  },
+  "author": "edited by mathias377 originally by dimden",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mathmakgakpak/better-owop.js/issues"
+  },
+  "homepage": "https://github.com/mathmakgakpak/better-owop.js#readme"
+}
