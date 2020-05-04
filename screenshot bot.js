@@ -3,9 +3,7 @@ const fs = require("fs");
 const util = require("util");
 
 const BOJS = require("./index.js");
-let captchaToken = fs.readFileSync("captchaToken.txt", {
-	encoding: "utf8"
-});
+
 
 
 let writeFile = util.promisify(fs.writeFile);
@@ -15,11 +13,7 @@ if(!fs.existsSync("./images")) {
 }
 
 let bot = new BOJS.Client({
-	//ws: "wss://owop-server.glitch.me",
-	//adminlogin: "mathias377 best xd", // bruhhhhhhhh
-	ws: "ws://dashnetpixels.duckdns.org",
-	controller: true,
-	captchaToken
+	controller: true
 })
 bot.setMaxListeners(0);
 
