@@ -1,7 +1,3 @@
-/*
-Author: mathias377
-
-*/
 //(()=>{
 	let isBrowser = typeof module === "undefined";
 
@@ -401,7 +397,7 @@ class Client extends EventEmitter {
 					user.rank = 0 //that.players[user.id] ? that.players[user.id].rank : 0;
 				} else if (before.toLowerCase().startsWith("-> you tell")) {
 					user.id = that.player.id;
-					user.nick = that..player.nick;
+					user.nick = that.player.nick;
 					tell = true;
 				}
 				return [user, message, tell, msg];
