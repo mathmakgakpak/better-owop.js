@@ -482,7 +482,7 @@ class Client extends EventEmitter {
 			},
 			setTool(tool) {
 				if (that.ws.readyState !== 1) return false;
-				OJS.player.tool = +tool;
+				that.player.tool = +tool;
 
 				let dv = new WeirdDataView(new ArrayBuffer(11));
 				dv.setInt32(that.player.y * 16);
