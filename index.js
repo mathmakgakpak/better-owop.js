@@ -147,7 +147,7 @@
       const chunkX = Math.floor(x / Client.options.chunkSize);
       const chunkY = Math.floor(y / Client.options.chunkSize);
 
-      const chunk = this.chunks[`${x},${y}`];
+      const chunk = this.getChunk(chunkX, chunkY);
       if (!chunk) return;
 
       const i = ChunkSystem.getIbyXY(x & Client.options.chunkSize - 1, y & Client.options.chunkSize - 1, Client.options.chunkSize);
@@ -639,7 +639,7 @@
       ws.onclose = () => {
         this.emit("close", ...arguments);
         this.log("Disconnected");
-        if (this.clientOptions.reconnect) setTimeout(this.makeSocket, this.clientOptions.reconnectTime)
+        if (this.clientOptions.reconnect) setTimeout(this.makeSocket.bind(this), this.clientOptions.reconnectTime)
       }
 
       ws.onmessage = e => {
@@ -703,6 +703,7 @@
                 pixel.x = dv.getInt32(); // pixel x
                 pixel.y = dv.getInt32(); // y
                 pixel.color = [dv.getUint8(), dv.getUint8(), dv.getUint8()];
+
                 this.chunkSystem.setPixel(pixel.x, pixel.y, pixel.color);
 
                 this.emit("pixelUpdate", pixel);
@@ -801,7 +802,7 @@
 
               let locked = !!dv.getUint8();
 
-              this.Chunks.setChunkProtection(chunkX, chunkY, locked);
+              this.chunkSystem.setChunkProtection(chunkX, chunkY, locked);
               this.emit("chunkProtect", chunkX, chunkY, locked);
               break;
             }
