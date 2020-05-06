@@ -588,10 +588,17 @@
         }
       };
       this.captcha = {
+        usedKeys: [],
         login(key) {
           if (!that.ws ||
             that.ws.readyState !== 1) return false;
+          if(that.captcha.usedKeys.includes(key)) {
+            return false
+          } else if(!key.startsWith("LETMEINPLZ")) {
+            that.captcha.usedKeys.push(key);
+          }
           that.ws.send(Client.options.misc.tokenVerification + key);
+          that.captcha.usedKeys.push(key);
           return true;
         },
         renderCaptcha(uniqueName = true) {
@@ -728,8 +735,8 @@
                     this.captcha.login("LETMEINPLZ" + this.clientOptions.captchaPass);
                     this.log("Trying to login using captcha pass");
                   } else if (this.clientOptions.captchaToken) {
-                    this.captcha.login(this.clientOptions.captchaToken);
                     this.log("Trying to login using captcha token");
+                    if(!this.captcha.login(this.clientOptions.captchaToken)) console.log("login failed token already used");
                   }
                   break;
                 }
