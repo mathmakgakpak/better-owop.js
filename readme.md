@@ -2,7 +2,6 @@
 
 ## TO-DO
 destroy\
-parseMessage\
 ifIsConnectedToWorld
 
 ## changelog
@@ -10,7 +9,7 @@ getPixel is now queued so you can just use await getPixel\
 EventEmitter for browser should be faster and node js uses normal EventEmitter\
 Fixed gae memory leak which caused 2 gb of memory while requesting `200x200x2` chunks I did 500x500x2 screenshot using this [link](https://freeimage.host/i/1588530749940.JYf3Sj)
 
-Added parseMessage (not finished)\
+Added parseMessage\
 Added wolfMove to setPixel which checks if you must move or not\
 Added login using Captcha token\
 Added bot nick
@@ -73,17 +72,17 @@ Client.on("join", () => {
 `join` - Joined to world [world name].\
 `id` - Got id [id].\
 `rawMessage` - Raw websocked message (ArrayBuffer or string) [data].\
-`playerUpdate` - Player updates [player object].\
-`pixelUpdate` - Pixel update [pixel object].\
-`playerLeft` - a player left [player object].\
-`playerJoin` - a player connected [player id].\
+`updatedPlayers` - Players updates [players object].\
+`updatedPixels` - Pixels update [pixels object].\
+`playersLeft` - a player left [players id object].\
+`newPlayers` - a player connected [player id].\
 `teleport` - got 'teleport' opcode. Very rare. [x, y].\
 `rank` - Got new rank. [rank].\
 `captcha` - Captcha state. [gcaptcha id].\
 `chunkProtect` - Chunk (un)protected. [x, y, newState].\
 `pquota` - New PQuota. [rate, per].\
 `chunk` - New chunk. [x, y, chunk, protected].\
-`message` - New message in chat. [msg].
+`message` - New message in chat. [msg, parsedMessage].
 
 # Options
 `ws` - Websocket server address. (default - `wss://ourworldofpixels.com`)\
@@ -91,7 +90,7 @@ Client.on("join", () => {
 `autoMakeSocket` - should make socket automatically (default - true)\
 `autoConnectWorld` - should join world automatically (default - true)\
 `protocol` - protocol id so if you set to 0 you will be able to connect bop it owop (default - 1)\
-`captchaSiteKey` - buh (default - 6LcgvScUAAAAAARUXtwrM8MP0A0N70z4DHNJh-KI)\
+`captchaSiteKey` - captcha key used only on browser to render captcha (default - 6LcgvScUAAAAAARUXtwrM8MP0A0N70z4DHNJh-KI)\
 `id` - ID for logging. If not set, OWOP ID will be used.\
 `agent` - Proxy Agent.\
 `world` -  World name. (default - `main`).\
@@ -106,7 +105,7 @@ Client.on("join", () => {
 `teleport` -  Teleport on 'teleport' opcode.\
 `controller` - Enable controller for this bot. (Use only once!).\
 `reconnectTime` - Reconnect time (ms) after disconnect (default - 5000).\
-`worldVerification` - buh (default - 25565)
+`worldVerification` - world verification code (default - 25565)
 `unsafe` - Use methods that are supposed to be only for admin or moderator or checking bucket.
 
 # Module
@@ -116,7 +115,13 @@ When you require lib, you get object with:
 `Bucket` - Bucket class for quota.\
 `ChunkSystem` - Class for chunks, pixels management.\
 `EventEmitter` - opcionally if you use browser version\
-`WeirdDataView` - Normal dataView which automatically adds offset (has other options just look into script)
+`WeirdDataView` - Normal dataView which automatically adds offset
+```js
+let dv = new BOJS.WeirdDataView(new ArrayBuffer(1));
+//dv.setUint8(value, offset = this.offset, addToOffset = true)
+dv.setUint8(1, null, false);
+dv.getUint8(); // 1
+```
 
 # API
 
@@ -154,9 +159,9 @@ Set tool that bot has eqquiped.
 #### Client.world.setColor(color = [0, 0, 0])
 Set color of bot.
 #### Client.world.protectChunk(x = player.x, y = player.y, newState = 1)
-Protect chunk. You need to be admin to use this but you can ignore this if you'll use `unsafe` option. 
+Protect chunk. You need to be admin to use this but you can ignore this if you'll use `unsafe` option.
 #### Client.world.clearChunk(x = player.x, y = player.y, rgb = player.color)
-Clear chunk. You need to be admin to use this but you can ignore this if you'll use `unsafe` option. 
+Clear chunk. You need to be admin to use this but you can ignore this if you'll use `unsafe` option.
 #### await Client.world.requestChunk(x = player.x, y = player.y, innacurate)
 Request chunk, it'll be loaded to `ChunkSystem`. If `inaccurate` argument is passed, it'll transform `x` and `y` to `chunkX` and `chunkY`, so you can use normal coords to request chunks. Returns raw chunk.
 ```js
@@ -213,7 +218,7 @@ All chunks and pixels stuff goes here.
 - **Chunks.chunks** - array with chunks. In this array chunks are saved like this: `Chunks.chunks[x][y]`.
 - **Chunks.chunkProtected** - same thing as `chunks` but only for protected chunks.
 
-Keep in mind, that you'll usually only need `Chunks.getPixel` from all this stuff here. 
+Keep in mind, that you'll usually only need `Chunks.getPixel` from all this stuff here.
 
 ### ChunkSystem.setChunk(x, y, data)
 Set chunk data.

@@ -323,8 +323,8 @@
         rank: 0,
 
         nick: options.nick,
-        chatBucket: null,
-        pixelBucket: null
+        chatBucket: new Bucket(...Client.options.chatQuota[0]),
+        pixelBucket: new Bucket(48, 4)
       };
       this.chat = {
         send(message, sendModifier = true) {
@@ -680,14 +680,17 @@
             case Client.options.opcode.worldUpdate: {
               let count = dv.getUint8(); // players update size
 
+              let updatedPlayers = {};
+              let newPlayers = [];
               for (let i = 0; i < count; i++) { // player updates
                 let id = dv.getUint32(); // player id
-                let isNew = false;
+                //let isNew = false;
                 if (!this.players[id]) {
-                  isNew = true;
+                  //isNew = true;
                   this.players[id] = new Client.utils.Player(id);
+                  newPlayers.push(id);
                 }
-                let player = this.players[id];
+                let player = updatedPlayers[id] = this.players[id];
 
                 player.x = dv.getInt32() / 16; // x
                 player.y = dv.getInt32() / 16; // y
@@ -698,12 +701,14 @@
                 player.tool = dv.getUint8(); // tool
                 player.tool = Client.options.tools[player.tool] ? player.tool : 0;
                 player.rank = Math.max(player.rank, Client.options.tools[player.tool][0]);
-
-                if (isNew) this.emit("playerConnect", player.id);
-                this.emit("playerUpdate", player);
               }
-              count = dv.getUint16(); // pixels update size
+              if(count) {
+                this.emit("updatedPlayers", updatedPlayers);
+                if(newPlayers.length) this.emit("newPlayers", newPlayers);
+              }
 
+              count = dv.getUint16(); // pixels update size
+              let updatedPixels = []
               for (let i = 0; i < count; i++) { // pixel updates
                 let pixel = {};
                 if (this.clientOptions.protocol === 1) pixel.id = dv.getUint32(); // player which set pixel id
@@ -713,16 +718,19 @@
 
                 this.chunkSystem.setPixel(pixel.x, pixel.y, pixel.color);
 
-                this.emit("pixelUpdate", pixel);
+                updatedPixels.push(pixel);
+                //this.emit("pixelUpdate", pixel);
               }
-              count = dv.getUint8(); // disconnections of players update size
+              if(count) this.emit("updatedPixels", updatedPixels);
 
+              count = dv.getUint8(); // disconnections of players update size
+              let disconnectedPlayers = [];
               for (let i = 0; i < count; i++) {
                 let leftId = dv.getUint32();
-                this.emit("playerLeft", leftId);
-
+                disconnectedPlayers.push(leftId);
                 delete this.players[leftId];
               }
+              if(count) this.emit("playersLeft", disconnectedPlayers);
               break;
             }
             case Client.options.opcode.captcha: {
@@ -815,9 +823,11 @@
             }
           }
         } else {
-          let parsedMessage = this.chat.parseMessage(msg);
           if (msg.startsWith("<")) return;
-
+          let parsedMessage = this.chat.parseMessage(msg);
+          if(parsedMessage.id) {
+            if(this.players[parsedMessage.id]) this.players[parsedMessage.id].nick = parsedMessage.nick;
+          }
           msg = this.chat.recvModifier(msg);
 
           if (this.chat.messages.length > Client.options.maxChatBuffer) this.chat.messages.shift();
@@ -828,7 +838,7 @@
           } else if (msg.toLowerCase().startsWith("Nickname set to")) {
             this.player.nick = msg.slice("Nickname set to: \"".length, -1);
           }
-          this.emit("message", msg);
+          this.emit("message", msg, parsedMessage);
           this.log(msg);
         }
       }
