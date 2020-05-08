@@ -592,9 +592,9 @@
         login(key) {
           if (!that.ws ||
             that.ws.readyState !== 1) return false;
-          if(that.captcha.usedKeys.includes(key)) {
+          if (that.captcha.usedKeys.includes(key)) {
             return false
-          } else if(!key.startsWith("LETMEINPLZ")) {
+          } else if (!key.startsWith("LETMEINPLZ")) {
             that.captcha.usedKeys.push(key);
           }
           that.ws.send(Client.options.misc.tokenVerification + key);
@@ -702,9 +702,9 @@
                 player.tool = Client.options.tools[player.tool] ? player.tool : 0;
                 player.rank = Math.max(player.rank, Client.options.tools[player.tool][0]);
               }
-              if(count) {
+              if (count) {
                 this.emit("updatedPlayers", updatedPlayers);
-                if(newPlayers.length) this.emit("newPlayers", newPlayers);
+                if (newPlayers.length) this.emit("newPlayers", newPlayers);
               }
 
               count = dv.getUint16(); // pixels update size
@@ -721,7 +721,7 @@
                 updatedPixels.push(pixel);
                 //this.emit("pixelUpdate", pixel);
               }
-              if(count) this.emit("updatedPixels", updatedPixels);
+              if (count) this.emit("updatedPixels", updatedPixels);
 
               count = dv.getUint8(); // disconnections of players update size
               let disconnectedPlayers = [];
@@ -730,7 +730,7 @@
                 disconnectedPlayers.push(leftId);
                 delete this.players[leftId];
               }
-              if(count) this.emit("playersLeft", disconnectedPlayers);
+              if (count) this.emit("playersLeft", disconnectedPlayers);
               break;
             }
             case Client.options.opcode.captcha: {
@@ -744,7 +744,7 @@
                     this.log("Trying to login using captcha pass");
                   } else if (this.clientOptions.captchaToken) {
                     this.log("Trying to login using captcha token");
-                    if(!this.captcha.login(this.clientOptions.captchaToken)) console.log("login failed token already used");
+                    if (!this.captcha.login(this.clientOptions.captchaToken)) console.log("login failed token already used");
                   }
                   break;
                 }
@@ -826,10 +826,10 @@
           if (msg.startsWith("<")) return;
           let parsedMessage = this.chat.parseMessage(msg);
           let userInfo = parsedMessage[0];
-          if(userInfo) {
-            if(userInfo.id) {
-              if(this.players[parsedMessage.id]) {
-                this.players[parsedMessage.id].nick = parsedMessage.nick;
+          if (userInfo) {
+            if (userInfo.id) {
+              if (this.players[userInfo.id]) {
+                this.players[userInfo.id].nick = userInfo.nick;
               }
             }
           }
@@ -854,22 +854,22 @@
 
   if (isBrowser && typeof OPM !== "undefined") {
     return {
-			install: () => {},
-			uninstall: () => {
-				alert("Refresh page to uninstall.");
-			},
-    	Client,
+      install: () => {},
+      uninstall: () => {
+        alert("Refresh page to uninstall.");
+      },
+      Client,
       ChunkSystem,
       WeirdDataView,
       EventEmitter,
-			Bucket
+      Bucket
     }
   } else if (!isBrowser) {
     module.exports = {
       Client,
       ChunkSystem,
       WeirdDataView,
-			Bucket
+      Bucket
     }
   }
 })();
