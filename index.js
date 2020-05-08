@@ -825,8 +825,13 @@
         } else {
           if (msg.startsWith("<")) return;
           let parsedMessage = this.chat.parseMessage(msg);
-          if(parsedMessage.id) {
-            if(this.players[parsedMessage.id]) this.players[parsedMessage.id].nick = parsedMessage.nick;
+          let userInfo = parsedMessage[0];
+          if(userInfo) {
+            if(userInfo.id) {
+              if(this.players[parsedMessage.id]) {
+                this.players[parsedMessage.id].nick = parsedMessage.nick;
+              }
+            }
           }
           msg = this.chat.recvModifier(msg);
 
