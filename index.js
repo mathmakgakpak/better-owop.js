@@ -708,7 +708,7 @@
               }
 
               count = dv.getUint16(); // pixels update size
-              let updatedPixels = []
+              let updatedPixels = [];
               for (let i = 0; i < count; i++) { // pixel updates
                 let pixel = {};
                 if (this.clientOptions.protocol === 1) pixel.id = dv.getUint32(); // player which set pixel id
@@ -778,10 +778,12 @@
 
               chunk = Client.utils.decompress(chunk);
 
+
+              let isNew = !this.chunkSystem.getChunk(chunkX, chunkY);
               this.chunkSystem.setChunk(chunkX, chunkY, chunk);
               this.chunkSystem.setChunkProtection(chunkX, chunkY, locked);
 
-              this.emit("chunk", chunkX, chunkY, chunk, locked);
+              this.emit("chunk", chunkX, chunkY, chunk, locked, isNew);
               break;
             }
             case Client.options.opcode.teleport: {

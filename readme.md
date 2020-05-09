@@ -81,7 +81,7 @@ Client.on("join", () => {
 `captcha` - Captcha state. [gcaptcha id].\
 `chunkProtect` - Chunk (un)protected. [x, y, newState].\
 `pquota` - New PQuota. [rate, per].\
-`chunk` - New chunk. [x, y, chunk, protected].\
+`chunk` - New chunk. [x, y, chunk, protected, isNew].\
 `message` - New message in chat. [msg, parsedMessage].
 
 # Options
