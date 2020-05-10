@@ -152,8 +152,9 @@ Function to join world. Should not be used, only for internal use! For connectio
 Leave world. If there's `reconnect` option enabled, client will try to reconnect after `options.reconnectTime` (default - 5000ms) seconds.
 #### Client.world.move(x = 0, y = 0)
 Move bot to X, Y.
-#### Client.world.setPixel(x = player.x, y = player.y, color = player.color, sneaky)
-Move and set pixel. If `sneaky` option is set to true, bot will return to old location.
+#### Client.world.setPixel(x = player.x, y = player.y, color = player.color, wolfMove = isNotAdmin, sneaky, move = isAdmin)
+Move and set pixel. If `sneaky` option is set to true, bot will return to old location.\
+wolf move checks if it must move when it is more than 3 chunks from x and y
 #### Client.world.setTool(id = 0)
 Set tool that bot has eqquiped.
 #### Client.world.setColor(color = [0, 0, 0])
@@ -176,8 +177,6 @@ Request chunk and get pixel.
 ### Client.player
 - Client.player.x
 - Client.player.y
-- Client.player.worldX - x\*16
-- Client.player.worldY - y\*16
 - Client.player.tool
 - Client.player.rank
 - Client.player.nick
@@ -237,6 +236,28 @@ Get pixel from chunk.
 
 ### ChunkSystem.setChunkProtect(x, y, newState)
 (un)Protect chunk.
+
+### </static> ChunkSystem.getIbyXY(x, y, width)
+so chunk is saved like that\
+Uint8Array(768) [\
+123, 123, 213, 123, 123, 213, ... to 16 * 3 (because pixel is 3 places)\
+123, 123, 213, 123, 123, 213, ... to 16 * 3\
+... to 16\
+]\
+1 pixel is 3 places in this array\
+
+so to get one pixel you need multiply y * width and add x and multiply it by 3 `(y*width+x)*3`\
+if you have alpha channel (ex. in image) it doesn't exists in normal chunks because it is always 255 it will be multiplied by 4\
+
+if you want get x and y from i you will need do\
+```
+i = i/3; // or 4 read before
+
+let pos = {
+	x: i % width,
+	y: Math.floor(i/width)
+};
+```
 
 ### ChunkSystem.isProtected(x, y)
 Is chunk protected.

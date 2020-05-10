@@ -438,7 +438,7 @@
           that.ws.send(dv.buffer);
           return true;
         },
-        setPixel(x = that.player.x, y = that.player.y, color = that.player.color, wolfMove = true, sneaky, move = true) {
+        setPixel(x = that.player.x, y = that.player.y, color = that.player.color, wolfMove = (that.player.rank >= 3), sneaky, move = (that.player.rank < 3)) {
           if (that.ws.readyState !== 1) return false;
           let oldX = that.player.x;
           let oldY = that.player.y;
