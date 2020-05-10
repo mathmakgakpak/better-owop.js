@@ -127,8 +127,6 @@ dv.getUint8(); // 1
 
 ## Client
 Client API is similar to OWOP, and some methods have same 'path'.
-### <\static>Client.RANK
-Object with all ranks - `ADMIN`, `MODERATOR`, `USER` and `NONE`.
 ### <\static> Client.options
 Object with OWOP options. Check code to see them.
 ### Client.clientOptions
