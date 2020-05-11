@@ -5,7 +5,7 @@ destroy\
 ifIsConnectedToWorld
 
 ## changelog
-getPixel is now queued so you can just use await getPixel\
+getPixel and requestChunk is now queued so you can just use await getPixel\
 EventEmitter for browser should be faster and node js uses normal EventEmitter\
 Fixed gae memory leak which caused 2 gb of memory while requesting `200x200x2` chunks I did 500x500x2 screenshot using this [link](https://freeimage.host/i/1588530749940.JYf3Sj)
 
