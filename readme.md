@@ -1,4 +1,4 @@
-# better OWOP.js
+# better OWOP.js (BETA)
 
 ## TO-DO
 destroy\
