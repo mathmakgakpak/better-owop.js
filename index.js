@@ -1,5 +1,5 @@
 (() => {
-  let isBrowser = typeof module === "undefined";
+  let isBrowser = typeof window !== "undefined";
   let OWOPUnlocked = typeof OWOP.require !== "undefined";
 
   if (OWOPUnlocked) {
@@ -241,6 +241,16 @@
       }
     };
     static utils = {
+      shouldMove(x1, y1, x2, y2) {
+        let distx = Math.trunc(x2/16) - Math.trunc(x1/16);
+        distx *= distx;
+        let disty = Math.trunc(y2/16) - Math.trunc(y1/16);
+        disty *= disty;
+
+        let dist = Math.sqrt(distx + disty);
+
+        return dist >= 3;
+      },
       decompress(u8arr) {
         var originalLength = u8arr[1] << 8 | u8arr[0];
         var u8decompressedarr = new Uint8Array(originalLength);
@@ -451,13 +461,7 @@
           y = +y;
           if (!that.unsafe && (!that.player.pixelBucket.canSpend(1) || that.player.rank === 0)) return false;
           if (wolfMove) {
-            let distx = Math.trunc(x / Client.options.chunkSize) - Math.trunc(that.player.x / (Client.options.chunkSize * 16));
-            distx *= distx;
-            let disty = Math.trunc(y / Client.options.chunkSize) - Math.trunc(that.player.y / (Client.options.chunkSize * 16));
-            disty *= disty;
-
-            let dist = Math.sqrt(distx + disty);
-            if (dist >= 3) that.world.move(x, y);
+            if (Client.utils.shouldMove(that.player.x, that.player.x, x, y)) that.world.move(x, y);
           } else if (move) {
             that.world.move(x, y);
           }
@@ -857,8 +861,8 @@
     }
   }
 
-  if (isBrowser && typeof OPM !== "undefined") {
-    return {
+  if (isBrowser) {
+    return { // browser
       install: () => {},
       uninstall: () => {
         alert("Refresh page to uninstall.");

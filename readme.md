@@ -5,6 +5,8 @@ destroy\
 ifIsConnectedToWorld
 
 ## changelog
+wolfMove fix
+
 now it will use webpack emitter on unlocked OWOPs
 removed html check (now you will be able to see motd)
 
@@ -197,13 +199,14 @@ List of players. Every player is object with properties:
 Example: `Client.players[15035]`.
 
 ### Client.captcha
-- renderCaptcha(uniquename = true) - if used on browser renders captcha otherwise throws error
+- renderCaptcha(uniquename = true) - renders captcha. If used on browser renders captcha otherwise throws error
 - login(token) - tries to login using captcha token
 
 ### <\static> Client.util
-- **Client.util.Player** - class of player
-- **Client.util.createChunkFromRGB** - used for older protocol which is on bop it's owop
-- **Client.util.decompress** - Chunk decompressor. Vars :(
+- **Client.util.Player** (id) - class of player
+- **Client.util.createChunkFromRGB** (color) - used for older protocol which is on bop it's owop
+- **Client.util.decompress** (compressedChunk) - Chunk decompressor. Vars :(
+- **Client.util.shouldMove** (x1, y1, x2, y2) - used for wolf move (go to setPixel)
 
 ### Client.chunkSystem
 Instance of `ChunkSystem`
