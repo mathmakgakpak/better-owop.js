@@ -5,6 +5,9 @@ destroy\
 ifIsConnectedToWorld
 
 ## changelog
+now it will use webpack emitter on unlocked OWOPs
+removed html check (now you will be able to see motd)
+
 getPixel and requestChunk is now queued so you can just use await getPixel\
 EventEmitter for browser should be faster and node js uses normal EventEmitter\
 Fixed gae memory leak which caused 2 gb of memory while requesting `200x200x2` chunks I did 500x500x2 screenshot using this [link](https://freeimage.host/i/1588530749940.JYf3Sj)
@@ -148,7 +151,7 @@ Function to join world. Should not be used, only for internal use! For connectio
 Leave world. If there's `reconnect` option enabled, client will try to reconnect after `options.reconnectTime` (default - 5000ms) seconds.
 #### Client.world.move(x = 0, y = 0)
 Move bot to X, Y.
-#### Client.world.setPixel(x = player.x, y = player.y, color = player.color, wolfMove = isNotAdmin, sneaky, move = isAdmin)
+#### Client.world.setPixel(x = player.x, y = player.y, color = player.color, wolfMove, sneaky, move = isAdmin)
 Move and set pixel. If `sneaky` option is set to true, bot will return to old location.\
 wolf move checks if it must move when it is more than 3 chunks from x and y
 #### Client.world.setTool(id = 0)
