@@ -14,8 +14,6 @@ Added wolfMove to setPixel which checks if you must move or not\
 Added login using Captcha token\
 Added bot nick
 
-Queued RequestChunk
-
 Render captcha returns captcha token
 
 
