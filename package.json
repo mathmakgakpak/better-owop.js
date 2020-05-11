@@ -1,6 +1,6 @@
 {
   "name": "better-owop-js",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "better owop-js",
   "main": "index.js",
   "dependencies": {

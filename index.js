@@ -1,6 +1,9 @@
 (() => {
   let isBrowser = typeof window !== "undefined";
-  let OWOPUnlocked = typeof OWOP.require !== "undefined";
+  let OWOPUnlocked = (() => {
+    if(typeof OWOP === "undefined") return false;
+    return typeof OWOP.require !== "undefined";
+  })();
 
   if (OWOPUnlocked) {
     EventEmitter = OWOP.require("events");

@@ -5,6 +5,8 @@ destroy\
 ifIsConnectedToWorld
 
 ## changelog
+OWOPUnlocked variable fix
+
 wolfMove fix
 
 now it will use webpack emitter on unlocked OWOPs
