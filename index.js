@@ -63,34 +63,28 @@
     setUint8(value, offset = this.offset, addToOffset = true) {
       let data = this.dv.setUint8(offset, value);
       this.offset = addToOffset ? offset + 1 : offset;
-      return data;
     }
     setInt8(value, offset = this.offset, addToOffset = true) {
       let data = this.dv.setInt8(offset, value);
       this.offset = addToOffset ? offset + 1 : offset;
-      return data;
     }
     // 16
     setUint16(value, offset = this.offset, littleEndian = true, addToOffset = true) {
       let data = this.dv.setUint16(offset, value, littleEndian);
       this.offset = addToOffset ? offset + 2 : offset;
-      return data;
     }
     setInt16(value, offset = this.offset, littleEndian = true, addToOffset = true) {
       let data = this.dv.setInt16(offset, value, littleEndian);
       this.offset = addToOffset ? offset + 2 : offset;
-      return data;
     }
     // 32
     setUint32(value, offset = this.offset, littleEndian = true, addToOffset = true) {
       let data = this.dv.setUint32(offset, value, littleEndian);
       this.offset = addToOffset ? offset + 4 : offset;
-      return data;
     }
     setInt32(value, offset = this.offset, littleEndian = true, addToOffset = true) {
       let data = this.dv.setInt32(offset, value, littleEndian);
       this.offset = addToOffset ? offset + 4 : offset;
-      return data;
     }
 
     // get
@@ -308,6 +302,7 @@
       const that = this;
       this.chunkSystem = new ChunkSystem();
       this.pendingLoad = {};
+      this.destroyed = false;
 
       if (!options.ws) options.ws = "wss://ourworldofpixels.com";
       if (!options.origin && !isBrowser) options.origin = options.ws.replace("ws", "http");
@@ -317,6 +312,9 @@
       if (typeof options.autoMakeSocket === "undefined") options.autoMakeSocket = true;
       if (typeof options.captchaSiteKey === "undefined") options.captchaSiteKey = "6LcgvScUAAAAAARUXtwrM8MP0A0N70z4DHNJh-KI";
       if (typeof options.reconnectTime === "undefined") options.reconnectTime = 5000;
+      if (typeof options.reconnectTries === "undefined") options.reconnectTries = -1; // endless
+      this.reconnectTries = options.reconnectTries;
+
       if (options.controller && !isBrowser) {
         const stdin = process.openStdin();
         stdin.on("data", d => {
@@ -643,7 +641,11 @@
     log(...args) {
       if (this.clientOptions.log) console.log(...args);
     }
-
+    destroy() {
+      if(this.ws.readyState === 1) this.ws.terminate();
+      this.destroyed = true;
+      this.emit("destroy");
+    }
     makeSocket() {
       let ws = new WebSocket(this.clientOptions.ws, isBrowser ? undefined : this.clientOptions);
 
@@ -652,12 +654,14 @@
 
       ws.onopen = () => {
         this.emit("open", ...arguments);
-        this.log("Connected")
+        this.log("Connected");
       }
       ws.onclose = () => {
         this.emit("close", ...arguments);
+        this.isWorldConnected = false;
         this.log("Disconnected");
-        if (this.clientOptions.reconnect) setTimeout(this.makeSocket.bind(this), this.clientOptions.reconnectTime)
+        // if someone dumb will set this.reconnectTries to 0 then it will change after \/ to -1 (endless) but will not connect
+        if (this.clientOptions.reconnect && (this.reconnectTries === -1 || this.reconnectTries--)) setTimeout(this.makeSocket.bind(this), this.clientOptions.reconnectTime)
       }
 
       ws.onmessage = e => {
@@ -671,21 +675,19 @@
           let len = dv.byteLength;
           switch (dv.getUint8()) {
             case Client.options.opcode.setId: {
-              let id = dv.getUint32();
-              this.player.id = id;
+              this.player.id = dv.getUint32();;
+              this.isWorldConnected = true;
 
-              this.emit("id", id);
+              this.player.rank = 0;
 
-              if (typeof this.player.rank !== "number") this.player.rank = 0;
-
-              this.log(`Joined world '${this.world.name}' and got id '${id}'`);
+              this.log(`Joined world '${this.world.name}' and got id '${this.player.id}'`);
 
               if (this.clientOptions.adminlogin) this.chat.send("/adminlogin " + this.clientOptions.adminlogin);
               if (this.clientOptions.modlogin) this.chat.send("/modlogin " + this.clientOptions.modlogin);
               if (this.clientOptions.pass) this.chat.send("/pass " + this.clientOptions.pass);
               if (this.clientOptions.nick) this.chat.send("/nick " + this.clientOptions.nick);
 
-              this.emit("join", this.world.name);
+              this.emit("join", this.world.name, this.player.id);
               break;
             }
             case Client.options.opcode.worldUpdate: {
@@ -836,6 +838,10 @@
             }
           }
         } else {
+          if(msg.toLowerCase().startsWith("you are banned")) {
+            this.destroy();
+            this.emit("ban", msg);
+          }
           let parsedMessage = this.chat.parseMessage(msg);
           let userInfo = parsedMessage[0];
           if (userInfo) {

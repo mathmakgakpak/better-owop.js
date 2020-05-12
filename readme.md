@@ -1,15 +1,20 @@
 # better OWOP.js (BETA)
 
 ## TO-DO
-destroy\
-ifIsConnectedToWorld
+idk
 
 ## changelog
+
+added isWorldConnected\
+added Client.destroyed\
+added Client.destroy()\
+### removed id event use join insted
+
 OWOPUnlocked variable fix
 
 wolfMove fix
 
-now it will use webpack emitter on unlocked OWOPs
+now it will use webpack emitter on unlocked OWOPs\
 removed html check (now you will be able to see motd)
 
 getPixel and requestChunk is now queued so you can just use await getPixel\
@@ -74,8 +79,7 @@ Client.on("join", () => {
 # Events
 `open` - WebSocket connecting got opened.\
 `close` - WebSocket connecting got closed [close reason].\
-`join` - Joined to world [world name].\
-`id` - Got id [id].\
+`join` - Joined to world [world name, id].\
 `rawMessage` - Raw websocked message (ArrayBuffer or string) [data].\
 `updatedPlayers` - Players updates [players object].\
 `updatedPixels` - Pixels update [pixels object].\
@@ -87,7 +91,9 @@ Client.on("join", () => {
 `chunkProtect` - Chunk (un)protected. [x, y, newState].\
 `pquota` - New PQuota. [rate, per].\
 `chunk` - New chunk. [x, y, chunk, protected, isNew].\
-`message` - New message in chat. [msg, parsedMessage].
+`message` - New message in chat. [msg, parsedMessage].\
+`destroy` - Socket was destroyed and will not reconnect until you will call bot.makeSocket().\
+Emits when you gets ban.
 
 # Options
 `ws` - Websocket server address. (default - `wss://ourworldofpixels.com`)\
@@ -176,6 +182,10 @@ if(inaccurate) {
 ```
 #### await Client.world.getPixel(x = player.x, y = player.y)
 Request chunk and get pixel.
+#### Client.destroy()
+makes that it will not reconnect until you will call bot.makeSocket()
+#### Client.makeSocket()
+makes socket of bot
 
 ### Client.player
 - Client.player.x
