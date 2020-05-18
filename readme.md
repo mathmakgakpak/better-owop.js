@@ -4,6 +4,7 @@
 idk
 
 ## changelog
+repaired unsafe
 
 added isWorldConnected\
 added Client.destroyed\

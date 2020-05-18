@@ -345,7 +345,7 @@
         send(message, sendModifier = true) {
           if (!that.ws ||
             that.ws.readyState !== 1) return false;
-          if (!that.unsafe) {
+          if (!that.clientOptions.unsafe) {
             if (!that.player.chatBucket.canSpend(1)) return false;
             message = message.slice(0, Client.options.maxMessageLength[that.player.rank]);
           }
@@ -434,6 +434,9 @@
           that.world.name = name;
           that.log("Joining world: " + name);
         },
+        leave() {
+          this.ws.close(); // bug it will reconnect if can
+        },
         move(x = that.player.x, y = that.player.y) {
           if (that.ws.readyState !== 1) return false;
 
@@ -460,7 +463,7 @@
 
           x = +x;
           y = +y;
-          if (!that.unsafe && (!that.player.pixelBucket.canSpend(1) || that.player.rank === 0)) return false;
+          if (!that.clientOptions.unsafe && (!that.player.pixelBucket.canSpend(1) || that.player.rank === 0)) return false;
           if (wolfMove) {
             if (Client.utils.shouldMove(that.player.x, that.player.x, x, y)) that.world.move(x, y);
           } else if (move) {
@@ -479,7 +482,7 @@
           return true;
         },
         paste(x, y, data) {
-          if (that.ws.readyState !== 1 || !that.unsafe && that.player.rank < 2) return false;
+          if (that.ws.readyState !== 1 || !that.clientOptions.unsafe && that.player.rank < 2) return false;
           let dv = new DataView(new ArrayBuffer(8 + Client.options.chunkSize * Client.options.chunkSize));
           dv.setInt32(0, x, true);
           dv.setInt32(4, y, true);
@@ -661,7 +664,7 @@
         this.isWorldConnected = false;
         this.log("Disconnected");
         // if someone dumb will set this.reconnectTries to 0 then it will change after \/ to -1 (endless) but will not connect
-        if (this.clientOptions.reconnect && (this.reconnectTries === -1 || this.reconnectTries--)) setTimeout(this.makeSocket.bind(this), this.clientOptions.reconnectTime)
+        if (!this.destroyed && this.clientOptions.reconnect && (this.reconnectTries === -1 || this.reconnectTries--)) setTimeout(this.makeSocket.bind(this), this.clientOptions.reconnectTime)
       }
 
       ws.onmessage = e => {
@@ -776,7 +779,6 @@
                 }
                 case Client.options.captchaState.INVALID: {
                   this.log("Captcha State: 4 (INVALID)");
-
                   break;
                 }
               }
