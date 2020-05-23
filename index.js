@@ -1,19 +1,19 @@
 (() => {
   let isBrowser = typeof window !== "undefined";
   let OWOPUnlocked = (() => {
-    if(typeof OWOP === "undefined") return false;
+    if (typeof OWOP === "undefined") return false;
     return typeof OWOP.require !== "undefined";
   })();
 
   if (OWOPUnlocked) {
     EventEmitter = OWOP.require("events");
-    //console.log("UwU")
   } else if (isBrowser) {
     !function(e){"use strict";function t(){}function n(e,t){for(var n=e.length;n--;)if(e[n].listener===t)return n;return-1}function r(e){return function(){return this[e].apply(this,arguments)}}function i(e){return"function"==typeof e||e instanceof RegExp||!(!e||"object"!=typeof e)&&i(e.listener)}var s=t.prototype,o=e.EventEmitter;s.getListeners=function(e){var t,n,r=this._getEvents();if(e instanceof RegExp){t={};for(n in r)r.hasOwnProperty(n)&&e.test(n)&&(t[n]=r[n])}else t=r[e]||(r[e]=[]);return t},s.flattenListeners=function(e){var t,n=[];for(t=0;t<e.length;t+=1)n.push(e[t].listener);return n},s.getListenersAsObject=function(e){var t,n=this.getListeners(e);return n instanceof Array&&(t={},t[e]=n),t||n},s.addListener=function(e,t){if(!i(t))throw new TypeError("listener must be a function");var r,s=this.getListenersAsObject(e),o="object"==typeof t;for(r in s)s.hasOwnProperty(r)&&-1===n(s[r],t)&&s[r].push(o?t:{listener:t,once:!1});return this},s.on=r("addListener"),s.addOnceListener=function(e,t){return this.addListener(e,{listener:t,once:!0})},s.once=r("addOnceListener"),s.defineEvent=function(e){return this.getListeners(e),this},s.defineEvents=function(e){for(var t=0;t<e.length;t+=1)this.defineEvent(e[t]);return this},s.removeListener=function(e,t){var r,i,s=this.getListenersAsObject(e);for(i in s)s.hasOwnProperty(i)&&-1!==(r=n(s[i],t))&&s[i].splice(r,1);return this},s.off=r("removeListener"),s.addListeners=function(e,t){return this.manipulateListeners(!1,e,t)},s.removeListeners=function(e,t){return this.manipulateListeners(!0,e,t)},s.manipulateListeners=function(e,t,n){var r,i,s=e?this.removeListener:this.addListener,o=e?this.removeListeners:this.addListeners;if("object"!=typeof t||t instanceof RegExp)for(r=n.length;r--;)s.call(this,t,n[r]);else for(r in t)t.hasOwnProperty(r)&&(i=t[r])&&("function"==typeof i?s.call(this,r,i):o.call(this,r,i));return this},s.removeEvent=function(e){var t,n=typeof e,r=this._getEvents();if("string"===n)delete r[e];else if(e instanceof RegExp)for(t in r)r.hasOwnProperty(t)&&e.test(t)&&delete r[t];else delete this._events;return this},s.removeAllListeners=r("removeEvent"),s.emitEvent=function(e,t){var n,r,i,s,o=this.getListenersAsObject(e);for(s in o)if(o.hasOwnProperty(s))for(n=o[s].slice(0),i=0;i<n.length;i++)r=n[i],!0===r.once&&this.removeListener(e,r.listener),r.listener.apply(this,t||[])===this._getOnceReturnValue()&&this.removeListener(e,r.listener);return this},s.trigger=r("emitEvent"),s.emit=function(e){var t=Array.prototype.slice.call(arguments,1);return this.emitEvent(e,t)},s.setOnceReturnValue=function(e){return this._onceReturnValue=e,this},s._getOnceReturnValue=function(){return!this.hasOwnProperty("_onceReturnValue")||this._onceReturnValue},s._getEvents=function(){return this._events||(this._events={})},t.noConflict=function(){return e.EventEmitter=o,t},"function"==typeof define&&define.amd?define(function(){return t}):"object"==typeof module&&module.exports?module.exports=t:e.EventEmitter=t}("undefined"!=typeof window?window:this||{});
     // upper thing is event emitter
   } else {
     WebSocket = require("ws");
     EventEmitter = require("events");
+    Canvas = require("canvas");
   }
 
   if (!Object.values) Object.values = function(object) {
@@ -183,6 +183,106 @@
     }
   };
 
+  const canvasUtils = {
+    getIbyXY(x, y, w) {
+      return (y * w + x) * 4;
+    },
+    _lerp(color1, color2, factor = 0.5) {
+      return Math.round(color1 + (color2 - color1) * factor);
+    },
+    lerp(color1, color2, factor = 0.5) {
+      let result = Uint8ClampedArray(3); // i don't really want other values like NaN
+
+      for (let i = 0; i < 3; i++) {
+        result[i] = canvasUtils._lerp(color1[i], color2[i], factor);
+      }
+      return result;
+    },
+    imageDataToCtx(imageData) { // canvas = ctx.canvas
+      let canvas = canvasUtils.createCanvas(imageData.width, imageData.height);
+      let ctx = canvas.getContext("2d");
+
+      ctx.putImageData(imageData, 0, 0);
+      return ctx;
+    },
+    createCanvas(width, height) {
+      let canvas;
+      if (isBrowser) {
+        canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+      } else {
+        canvas = new Canvas.Canvas(width, height);
+      }
+      return canvas;
+    },
+    createImageData() {
+      let imageData;
+
+      if (isBrowser) {
+        let canvas = document.createElement("canvas");
+        let ctx = canvas.getContext("2d");
+        imageData = ctx.createImageData(...arguments);
+      } else {
+        imageData = Canvas.createImageData(...arguments);
+      }
+
+      return imageData;
+    },
+    dataToImageData(data, width, height, hasAlpha = true, alpha = 255) {
+      let imageData = canvasUtils.createImageData(width, height);
+      if (!hasAlpha) {
+        data = canvasUtils.addAlphaToData(data, alpha);
+      }
+
+      for (let i = 0; i < data.length; i++) imageData.data[i] = data[i]; // WTF WHY IT CAN'T BE JUST image.data = data; WHYYYYYYYYYYYYYYYYYYYYYYYYYYY
+
+      return imageData;
+    },
+    removeAlphaFromImageData(data) {
+      if (data.length % 4 !== 0) throw new Error("Data is not image data");
+
+      let newData = new Uint8ClampedArray(data.length - data.length / 4);
+      for (let i = 0, i2 = 0; i < newData.length;) {
+        newData[i++] = data[i2++];
+        newData[i++] = data[i2++];
+        newData[i++] = data[i2++];
+        i2++;
+      }
+      return newData;
+    },
+    addAlphaToData(data, alpha = 255) {
+      if (data.length % 3 !== 0) throw new Error("Data is not data ;-;");
+      let newData = new Uint8ClampedArray(data.length + data.length / 3);
+
+      for (let i = 0, i2 = 0; i < newData.length;) {
+        newData[i++] = data[i2++];
+        newData[i++] = data[i2++];
+        newData[i++] = data[i2++];
+        newData[i++] = alpha;
+      }
+      return newData;
+    }/*,
+    lerpImageDataWithNormalColors(imageData, imageDataWithoutAlphaChannel) { // i will delete it but i added it idk why
+      let lerped = new Uint8ClampedArray(imageDataWithoutAlphaChannel.length);
+      for (let i = 0, i2 = 0; i < imageData.length;) {
+        let factor = imageData[i + 3];
+        lerped[i2] = canvasUtils._lerp(imageDataWithoutAlphaChannel[i2], imageData[i], factor / 255);
+        i++;
+        i2++;
+        lerped[i2] = canvasUtils._lerp(imageDataWithoutAlphaChannel[i2], imageData[i], factor / 255);
+        i++;
+        i2++;
+        lerped[i2] = canvasUtils._lerp(imageDataWithoutAlphaChannel[i2], imageData[i], factor / 255);
+        i++;
+        i2++;
+
+        i++;
+      }
+      return lerped;
+    }*/
+  };
+
   class Client extends EventEmitter {
     static options = {
       chunkSize: 16,
@@ -239,9 +339,9 @@
     };
     static utils = {
       shouldMove(x1, y1, x2, y2) {
-        let distx = Math.trunc(x2/16) - Math.trunc(x1/16);
+        let distx = Math.trunc(x2 / Client.options.chunkSize) - Math.trunc(x1 / Client.options.chunkSize);
         distx *= distx;
-        let disty = Math.trunc(y2/16) - Math.trunc(y1/16);
+        let disty = Math.trunc(y2 / Client.options.chunkSize) - Math.trunc(y1 / Client.options.chunkSize);
         disty *= disty;
 
         let dist = Math.sqrt(distx + disty);
@@ -250,7 +350,7 @@
       },
       decompress(u8arr) {
         var originalLength = u8arr[1] << 8 | u8arr[0];
-        var u8decompressedarr = new Uint8Array(originalLength);
+        var u8decompressedarr = new Uint8ClampedArray(originalLength);
         var numOfRepeats = u8arr[3] << 8 | u8arr[2];
         var offset = numOfRepeats * 2 + 4;
         var uptr = 0;
@@ -288,13 +388,18 @@
         }
       },
       createChunkFromRGB(color) {
-        let tile = new Uint8Array(Client.options.chunkSize * Client.options.chunkSize * 3);
+        let tile = new Uint8ClampedArray(Client.options.chunkSize * Client.options.chunkSize * 3);
         for (var i = 0; i < tile.length;) {
           tile[i++] = color[0];
           tile[i++] = color[1];
           tile[i++] = color[2];
         }
         return tile;
+      },
+      isArraysSame(...arrays) {
+        arrays = arrays.map(array => JSON.stringify(array));
+
+        return !arrays.filter(array => arrays[0] !== array).length;
       }
     };
     constructor(options = {}) {
@@ -481,15 +586,70 @@
           if (sneaky) that.world.move(oldX, oldY);
           return true;
         },
-        paste(x, y, data) {
+        pasteChunk(x, y, data) {
           if (that.ws.readyState !== 1 || !that.clientOptions.unsafe && that.player.rank < 2) return false;
-          let dv = new DataView(new ArrayBuffer(8 + Client.options.chunkSize * Client.options.chunkSize));
+
+          let dv = new DataView(new ArrayBuffer(8 + Client.options.chunkSize * Client.options.chunkSize * 3));
           dv.setInt32(0, x, true);
           dv.setInt32(4, y, true);
-          for (var i = 0; i < data.length; i++) {
-            dv.setUint8(i + 8, data[i]);
-          }
+          for (let i = 0; i < data.length; i++) dv.setUint8(8 + i, data[i]);
+
           that.ws.send(dv.buffer);
+          return true;
+        },
+        async pasteImageData(x, y, imageData, isImage) { // tried to do fastest as possible
+          if (that.ws.readyState !== 1 || !that.clientOptions.unsafe && that.player.rank < 2) return false;
+
+          // math
+          let chunkXStart = Math.floor(x / Client.options.chunkSize);
+          let chunkXEnd = Math.floor((x + imageData.width) / Client.options.chunkSize) + 1;
+          let chunkYStart = Math.floor(x / Client.options.chunkSize);
+          let chunkYEnd = Math.floor((x + imageData.height) / Client.options.chunkSize) + 1;
+
+          let canvasWidthInChunks = chunkXEnd - chunkXStart;
+          let canvasHeightInChunks = chunkYEnd - chunkXStart;
+
+          let posXOnCanvas = x % Client.options.chunkSize;
+          let posYOnCanvas = y % Client.options.chunkSize;
+
+          // some shit
+          let canvas = canvasUtils.createCanvas(canvasWidthInChunks * Client.options.chunkSize, canvasHeightInChunks * Client.options.chunkSize);
+          let ctx = canvas.getContext("2d");
+          let image = isImage ? imageData : canvasUtils.imageDataToCtx(imageData).canvas;
+
+          // requesting chunks and setting them on canvas
+          await new Promise(resolve => {
+            let chunksLasted = canvasWidthInChunks * canvasHeightInChunks;
+
+            for (let xx = chunkXStart, canvasX = 0; xx < chunkXEnd; xx++, canvasX += Client.options.chunkSize) {
+              for (let yy = chunkYStart, canvasY = 0; yy < chunkYEnd; yy++, canvasY += Client.options.chunkSize) {
+
+                that.world.requestChunk(xx, yy).then(data => {
+                  let chunkImageData = canvasUtils.dataToImageData(data, Client.options.chunkSize, Client.options.chunkSize, false);
+
+                  ctx.putImageData(chunkImageData, canvasX, canvasY);
+
+                  chunksLasted--;
+                  if (!chunksLasted) resolve();
+                });
+              }
+            }
+          });
+
+          ctx.drawImage(image, posXOnCanvas, posYOnCanvas); // setting image
+
+          // pasting
+          for (let xx = chunkXStart, canvasX = 0; xx < chunkXEnd; xx++, canvasX += Client.options.chunkSize) {
+            for (let yy = chunkYStart, canvasY = 0; yy < chunkYEnd; yy++, canvasY += Client.options.chunkSize) {
+              let chunkImageData = ctx.getImageData(canvasX, canvasY, Client.options.chunkSize, Client.options.chunkSize);
+              let chunkData = canvasUtils.removeAlphaFromImageData(chunkImageData.data);
+
+              if (Client.utils.isArraysSame(chunkData, that.chunkSystem.getChunk(xx, yy))) continue;
+
+              that.world.pasteChunk(xx, yy, chunkData);
+            }
+          }
+
           return true;
         },
         setTool(tool) {
@@ -538,7 +698,7 @@
               dv.setInt32(y);
               that.ws.send(dv.buffer);
             } else {
-              that.world.paste(x, y, Client.utils.createChunkFromRGB(color));
+              that.world.pasteChunk(x, y, Client.utils.createChunkFromRGB(color));
             }
           } else {
             let dv = new WeirdDataView(new ArrayBuffer(13));
@@ -576,9 +736,7 @@
             that.world.__requestChunk(x, y);
           });
         },
-        requestChunk(x, y, inaccurate) {
-          if (isBrowser)
-            if (that.clientOptions.simpleChunks) return true;
+        requestChunk(x, y, inaccurate) { // i think that there is simplier way but i can't invent it
           if (inaccurate) {
             x = Math.floor(x / Client.options.chunkSize);
             y = Math.floor(y / Client.options.chunkSize);
@@ -645,7 +803,7 @@
       if (this.clientOptions.log) console.log(...args);
     }
     destroy() {
-      if(this.ws.readyState === 1) this.ws.terminate();
+      if (this.ws.readyState === 1) this.ws.terminate();
       this.destroyed = true;
       this.emit("destroy");
     }
@@ -788,8 +946,8 @@
               let chunkX = dv.getInt32();
               let chunkY = dv.getInt32();
 
-              let chunk = new Uint8Array(msg, 10);
               let locked = !!dv.getUint8();
+              let chunk = new Uint8ClampedArray(msg, 10);
 
               chunk = Client.utils.decompress(chunk);
 
@@ -806,7 +964,7 @@
               let x = dv.getInt32();
               let y = dv.getInt32();
 
-              this.world.move(x, y); // verification that player has been teleported
+              this.world.move(x, y); // lazy to write
               this.emit("teleport", x, y);
               break;
             }
@@ -840,7 +998,7 @@
             }
           }
         } else {
-          if(msg.toLowerCase().startsWith("you are banned")) {
+          if (msg.toLowerCase().startsWith("you are banned")) {
             this.destroy();
             this.emit("ban", msg);
           }
@@ -882,14 +1040,16 @@
       ChunkSystem,
       WeirdDataView,
       EventEmitter, // should be defined globally
-      Bucket
+      Bucket,
+      canvasUtils
     }
   } else if (!isBrowser) {
     module.exports = {
       Client,
       ChunkSystem,
       WeirdDataView,
-      Bucket
+      Bucket,
+      canvasUtils
     }
   }
 })();

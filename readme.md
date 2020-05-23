@@ -1,9 +1,13 @@
 # better OWOP.js (BETA)
 
 ## TO-DO
-idk
+remove WeirdDataView from not needed places like setPixel move etc.
 
 ## changelog
+added canvasUtils
+added pasteImageData
+changed paste to pasteChunk
+
 repaired unsafe
 
 added isWorldConnected\
@@ -56,7 +60,8 @@ const BOJS = OPM.require("better-owop-js");
 const Client = new BOJS.Client({
 	protocol: 0 // if you want connecto to bop it's owop,
 	ws: "ws://104.237.150.24:1337",
-	world: "owop" // default world is owop on his owop
+	world: "owop", // default world is owop on his owop
+	unsafe: true // because pixel bucket is ignored in bop it's owop and then you will can use infinity setPixel
 });
 
 Client.on("join", () => {
@@ -156,6 +161,26 @@ Function for modifying and getting messages that you're getting from server.
 All messages that you got. Keep in mind that it can only hold maximum of `Client.options.maxChatBuffer` messages in it (default - 256).
 
 ### Client.world
+
+#### Client.world.pasteChunk(chunkX, chunkY, chunkData)
+Pastes chunk
+#### async Client.world.pasteImageData(pixelX, pixelY, imageData, isCanvasOrImage)
+Pastes imageData/image/canvas
+```js
+let imageData = canvasUtils.createImageData(10, 10);
+let i = canvasUtils.getIbyXY(1, 3);
+
+imageData.data[i] = 123;
+imageData.data[i + 1] = 32;
+imageData.data[i + 2] = 123;
+imageData.data[i + 3] = 255; // then it will not be transparent
+
+await bot.world.pasteImageData(12, 12, imageData); // pastes one pixel
+bot.on("chunk", (x, y) => {
+	if(x === Math.floor(12 / 16) && y === Math.floor(12 / 16)) bot.world.pasteImageData(12, 13, canvasUtils.imageDataToCtx(imageData).canvas, true); // pastes pixel under pixel
+});
+```
+
 #### Client.world.join(name)
 Function to join world. Should not be used, only for internal use! For connections to new worlds you should use new `Client` with `world` option in it.
 #### Client.world.leave()
@@ -215,11 +240,13 @@ Example: `Client.players[15035]`.
 - renderCaptcha(uniquename = true) - renders captcha. If used on browser renders captcha otherwise throws error
 - login(token) - tries to login using captcha token
 
-### <\static> Client.util
-- **Client.util.Player** (id) - class of player
-- **Client.util.createChunkFromRGB** (color) - used for older protocol which is on bop it's owop
-- **Client.util.decompress** (compressedChunk) - Chunk decompressor. Vars :(
-- **Client.util.shouldMove** (x1, y1, x2, y2) - used for wolf move (go to setPixel)
+### <\static> Client.utils
+- **Client.utils.Player** (id) - class of player
+- **Client.utils.createChunkFromRGB** (color) - used for older protocol which is on bop it's owop
+- **Client.utils.decompress** (compressedChunk) - Chunk decompressor. Vars :(
+- **Client.utils.shouldMove** (x1, y1, x2, y2) - used for wolf move (go to setPixel)
+- <s>**Client.utils.removeAlphaFromImageData** (imagedata) - removes alpha channel</s> - renamed and moved to canvasUtils
+- **Client.utils.isArraysSame** (...arrays) - Checks if arrays are same
 
 ### Client.chunkSystem
 Instance of `ChunkSystem`
@@ -254,7 +281,7 @@ Get pixel from chunk.
 
 ### </static> ChunkSystem.getIbyXY(x, y, width)
 so chunk is saved like that\
-Uint8Array(768) [\
+Uint8ClampedArray(768) [\
 123, 123, 213, 123, 123, 213, ... to 16 * 3 (because pixel is 3 places)\
 123, 123, 213, 123, 123, 213, ... to 16 * 3\
 ... to 16\
@@ -276,6 +303,56 @@ let pos = {
 
 ### ChunkSystem.isProtected(x, y)
 Is chunk protected.
+
+## canvasUtils
+
+### canvasUtils.\_lerp(color1, color2, factor = 0.5)
+lerps color
+```js
+canvasUtils._lerp(255, 123, 0.1); // 242
+```
+
+### canvasUtils.lerp(color1, color2, factor = 0.5)
+lerps RGB array
+```js
+canvasUtils.lerp([255, 255, 255], [123, 123, 123], 0.1); // Uint8ClampedArray(3) [242, 242, 242]
+```
+
+### canvasUtils.imageDataToCtx(imageData)
+converts imageData to ctx\
+ps. canvas = ctx.canvas
+
+### canvasUtils.createCanvas(width, height)
+Creates canvas.\
+Remeber that if you know on what engine(browser, nodejs) you are working faster will be creating canvas normal way
+
+### canvasUtils.createImageData(...arguments)
+Creates imageData
+```js
+canvasUtils.createImageData(width, height);
+canvasUtils.createImageData(imageData);
+```
+
+### canvasUtils.dataToImageData(data, width, height, hasAlpha = true, alpha = 255)
+Creates imageData
+```js
+let chunkImageData = canvasUtils.dataToImageData(bot.chunkSystem.getChunk(0, 0), BOJS.Client.options.chunkSize, BOJS.Client.options.chunkSize, false); // default alpha is 255
+
+let imageDataCopy = canvasUtils.dataToImageData(imageData.data, imageData.width, imageData.height);
+```
+
+### canvasUtils.removeAlphaFromImageData(data (imageData.data))
+Removes alpha channel from imageData
+
+```js
+canvasUtils.removeAlphaFromImageData([255, 252, 123, 32,   255, 252, 123, 32, ...]); // Uint8ClampedArray(data.length - data.length / 4) [255, 252, 123,   255, 252, 123, ...]
+```
+
+### canvasUtils.addAlphaToData(data, alpha = 255)
+Adds alpha channel to data
+```js
+canvasUtils.addAlphaToData(new Uint8Array([123,54,32, 145,23,43]), 123) // Uint8ClampedArray(data.length + data.length/4) [123,54,32,123, 145,23,43,123]
+```
 
 # Author
 License - Mit\
