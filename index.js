@@ -191,7 +191,7 @@
       return Math.round(color1 + (color2 - color1) * factor);
     },
     lerp(color1, color2, factor = 0.5) {
-      let result = Uint8ClampedArray(3); // i don't really want other values like NaN
+      let result = new Uint8ClampedArray(3); // i don't really want other values like NaN
 
       for (let i = 0; i < 3; i++) {
         result[i] = canvasUtils._lerp(color1[i], color2[i], factor);
