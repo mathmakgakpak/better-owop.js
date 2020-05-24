@@ -1,7 +1,7 @@
 {
   "name": "better-owop-js",
-  "version": "1.1.4",
-  "description": "better owop-js",
+  "version": "1.1.5",
+  "description": "better owop- js",
   "main": "index.js",
   "dependencies": {
     "ws": "^7.2.5",
@@ -15,7 +15,7 @@
     "type": "git",
     "url": "git+https://github.com/mathmakgakpak/better-owop.js.git"
   },
-  "author": "edited by mathias377 originally by dimden",
+  "author": "rewrited by mathias377 dimden created owop-js",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/mathmakgakpak/better-owop.js/issues"

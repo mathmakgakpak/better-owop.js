@@ -4,6 +4,8 @@
 remove WeirdDataView from not needed places like setPixel move etc.
 
 ## changelog
+repaired pasteImageData
+
 added canvasUtils
 added pasteImageData
 changed paste to pasteChunk

@@ -602,12 +602,14 @@
 
           // math
           let chunkXStart = Math.floor(x / Client.options.chunkSize);
+          let chunkYStart = Math.floor(y / Client.options.chunkSize);
+
           let chunkXEnd = Math.floor((x + imageData.width) / Client.options.chunkSize) + 1;
-          let chunkYStart = Math.floor(x / Client.options.chunkSize);
-          let chunkYEnd = Math.floor((x + imageData.height) / Client.options.chunkSize) + 1;
+          let chunkYEnd = Math.floor((y + imageData.height) / Client.options.chunkSize) + 1;
+          console.log(x, y, chunkXStart, chunkYStart, chunkXEnd, chunkYEnd)
 
           let canvasWidthInChunks = chunkXEnd - chunkXStart;
-          let canvasHeightInChunks = chunkYEnd - chunkXStart;
+          let canvasHeightInChunks = chunkYEnd - chunkYStart;
 
           let posXOnCanvas = x % Client.options.chunkSize;
           let posYOnCanvas = y % Client.options.chunkSize;
