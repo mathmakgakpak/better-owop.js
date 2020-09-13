@@ -659,7 +659,7 @@
           that.player.tool = +tool;
 
           let dv = new WeirdDataView(new ArrayBuffer(12));
-          dv.setInt32(that.player.y * 16);
+          dv.setInt32(that.player.x * 16);
           dv.setInt32(that.player.y * 16);
           dv.setUint8(that.player.color[0]);
           dv.setUint8(that.player.color[1]);
@@ -673,7 +673,7 @@
           that.player.color = color;
 
           let dv = new WeirdDataView(new ArrayBuffer(12));
-          dv.setInt32(that.player.y * 16);
+          dv.setInt32(that.player.x * 16);
           dv.setInt32(that.player.y * 16);
           dv.setUint8(that.player.color[0]);
           dv.setUint8(that.player.color[1]);
@@ -805,7 +805,7 @@
       if (this.clientOptions.log) console.log(...args);
     }
     destroy() {
-      if (this.ws.readyState === 1) this.ws.terminate();
+      if (this.ws.readyState === 1) this.ws.terminate ? this.ws.terminate() : this.ws.close();
       this.destroyed = true;
       this.emit("destroy");
     }
